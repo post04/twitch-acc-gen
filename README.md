@@ -4,8 +4,8 @@
 # How to use
 I will not be providing examples, just a general over view.
 
-1.) get a few (or just one) API key from [scraperAPI](https://www.scraperapi.com)__
-2.) get an API key and credits from [bestcaptchasolver](https://bestcaptchasolver.com)__
+1.) get a few (or just one) API key from [scraperAPI](https://www.scraperapi.com)\
+2.) get an API key and credits from [bestcaptchasolver](https://bestcaptchasolver.com)\
 3.) get your twitch userID (you'll have you figure this out on your own, I did it so can you)
 
 # Notice
