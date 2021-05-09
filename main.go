@@ -258,7 +258,7 @@ func main() {
 						}
 						Oauth := r.OAuth
 						followThatMan(c.TwitchID, Oauth, scraperKey)
-						saveAccount(fmt.Sprintf("\n=====================\nUseranme: %v\nPassword: %v\nEmail: %v\nOAuth: %v\n=====================", username, c.Password, email, Oauth))
+						saveAccount(fmt.Sprintf("\n=====================\nUsername: %v\nPassword: %v\nEmail: %v\nOAuth: %v\n=====================", username, c.Password, email, Oauth))
 					}(capKeys[i])
 				}
 				wg.Wait()
