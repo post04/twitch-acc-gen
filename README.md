@@ -1,5 +1,5 @@
 # twitch-acc-gen
- An account creator/follow bot for twitch.tv
+ An account creator/follow bot for [twitch](https://twitch.tv)
 
 # How to use
 I will not be providing examples, just a general over view.
@@ -12,4 +12,4 @@ I will not be providing examples, just a general over view.
 Follow botting/account generation is against the TOS of twitch. I do not condone anyone using this tool. I made this tool as a passion project and decided to release it. Please do this **skid** this and please do not use this to create a toxic place on twitch.
 
 # Credit(s)
-[azaelgg](https://github.com/azaelgg) for even getting me interested in this in the first place. He also provided a lot of code for the follow bot initally. 
+[azaelgg](https://github.com/azaelgg) for even getting me interested in this in the first place. He also provided a lot of code for the follow bot initially.
