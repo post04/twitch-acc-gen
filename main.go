@@ -228,10 +228,9 @@ func main() {
 						}
 						email := getEmail()
 						username := getUsername()
-						password := "dfgsjmsdhsd27834!!5837"
 						account := registerAccount(&TwitchRegisterBody{
 							Username: username,
-							Password: password,
+							Password: c.Password,
 							Email:    email,
 							Birthday: TwitchBirthday{
 								Day:   12,
@@ -259,7 +258,7 @@ func main() {
 						}
 						Oauth := r.OAuth
 						followThatMan(c.TwitchID, Oauth, scraperKey)
-						saveAccount(fmt.Sprintf("\n=====================\nUseranme: %v\nPassword: %v\nEmail: %v\nOAuth: %v\n=====================", username, password, email, Oauth))
+						saveAccount(fmt.Sprintf("\n=====================\nUseranme: %v\nPassword: %v\nEmail: %v\nOAuth: %v\n=====================", username, c.Password, email, Oauth))
 					}(capKeys[i])
 				}
 				wg.Wait()

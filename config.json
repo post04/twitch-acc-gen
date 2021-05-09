@@ -1,5 +1,6 @@
 {
     "twitchID": "",
     "captchaKey": "",
-    "scraperAPIKeys": []
+    "scraperAPIKeys": [],
+    "password": ""
 }

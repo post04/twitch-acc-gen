@@ -5,6 +5,7 @@ type Config struct {
 	TwitchID       string   `json:"twitchID"`
 	CaptchaKey     string   `json:"captchaKey"`
 	ScraperAPIKeys []string `json:"scraperAPIKeys"`
+	Password       string   `json:"password"`
 }
 
 // TwitchRegisterBody is the body submitted when registering an account
