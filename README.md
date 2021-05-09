@@ -9,7 +9,7 @@ I will not be providing examples, just a general over view.
 3.) get your twitch userID (you'll have you figure this out on your own, I did it so can you)
 
 # Notice
-Follow botting/account generation is against the TOS of twitch. I do not condone anyone using this tool. I made this tool as a passion project and decided to release it. Please do this **skid** this and please do not use this to create a toxic place on twitch.
+Follow botting/account generation is against the TOS of twitch. I do not condone anyone using this tool. I made this tool as a passion project and decided to release it. Please do not **skid** this and please do not use this to create a toxic place on twitch.
 
 # Credit(s)
 [azaelgg](https://github.com/azaelgg) for even getting me interested in this in the first place. He also provided a lot of code for the follow bot initially.
