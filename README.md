@@ -1,5 +1,8 @@
 # twitch-acc-gen
  An account creator/follow bot for [twitch](https://twitch.tv)
+ 
+# Reason for release
+Recently I've been seeing a lot of services pop up for twitch, these services charge absolutely insane amounts and no one really knows how easy it really is to generate accounts and mass follow people. I'm hoping this program doesn't fuel the problem but instead tunes it down. I've also just been having this collecting dust on my desktop for a few months and needed a purpose for it (github stars).
 
 # How to use
 I will not be providing examples, just a general over view.
