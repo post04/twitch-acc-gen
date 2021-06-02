@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -203,6 +204,14 @@ func followThatMan(id, oAuth, scraperAPIKey string) string {
 }
 
 func main() {
+	f, err := os.ReadFile("config.json")
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal(f, &c)
+	if err != nil {
+		panic(err)
+	}
 	// make a go routine for every scraper api key I have
 	keywg := sync.WaitGroup{}
 	for _, key := range c.ScraperAPIKeys {
