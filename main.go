@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -97,10 +98,9 @@ func getUsername() string {
 	return r.Username
 }
 
-func registerAccount(body *TwitchRegisterBody, scraperAPIKey string) string {
-	client := http.Client{}
+func registerAccount(body *TwitchRegisterBody, client *http.Client) string {
 	bodyMarshal, _ := json.Marshal(body)
-	req, err := http.NewRequest("POST", "http://api.scraperapi.com/?api_key="+scraperAPIKey+"&url=https://passport.twitch.tv/register", strings.NewReader(string(bodyMarshal)))
+	req, err := http.NewRequest("POST", "https://passport.twitch.tv/register", strings.NewReader(string(bodyMarshal)))
 	if err != nil {
 		fmt.Println(err)
 		return "err at step 1"
@@ -116,10 +116,9 @@ func registerAccount(body *TwitchRegisterBody, scraperAPIKey string) string {
 	return string(bodyBytes)
 }
 
-func getUserID(OAuth, clientID, scraperAPIKey string) string {
+func getUserID(OAuth, clientID string, client *http.Client) string {
 	b := []byte(`[{"operationName":"VerifyEmail_CurrentUser","variables":{},"extensions":{"persistedQuery":{"version":1,"sha256Hash":"f9e7dcdf7e99c314c82d8f7f725fab5f99d1df3d7359b53c9ae122deec590198"}}}]`)
-	client := http.Client{}
-	req, err := http.NewRequest("POST", "http://api.scraperapi.com/?api_key="+scraperAPIKey+"&url="+"https://gql.twitch.tv/gql&keep_headers=true", strings.NewReader(string(b)))
+	req, err := http.NewRequest("POST", "https://gql.twitch.tv/gql", strings.NewReader(string(b)))
 	if err != nil {
 		return ""
 	}
@@ -152,12 +151,7 @@ func setCaptchaBad(capKey int) {
 	client.Do(req)
 }
 
-func followThatMan(id, oAuth, scraperAPIKey string) string {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
-
+func followThatMan(id, oAuth string, client *http.Client) string {
 	body := strings.NewReader(fmt.Sprintf(`[{
 
     "operationName": "FollowButton_FollowUser",
@@ -174,7 +168,7 @@ func followThatMan(id, oAuth, scraperAPIKey string) string {
         }
     }
 }]`, id))
-	req, err := http.NewRequest("POST", "http://api.scraperapi.com/?api_key="+scraperAPIKey+"&url=https://gql.twitch.tv/gql&keep_headers=true", body)
+	req, err := http.NewRequest("POST", "https://gql.twitch.tv/gql", body)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -212,67 +206,63 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// make a go routine for every scraper api key I have
-	keywg := sync.WaitGroup{}
-	for _, key := range c.ScraperAPIKeys {
-		keywg.Add(1)
-		go func(scraperKey string) {
-			defer keywg.Done()
-			// make an infinate for loop that creates 5 captcha keys then makes a goroutine with those keys to generate an account
-			for {
-				var capKeys []int
-				for i := 0; i < 1; i++ {
-					key := getCaptchaKey()
-					capKeys = append(capKeys, key)
+	// make an infinate for loop that creates 5 captcha keys then makes a goroutine with those keys to generate an account
+	for {
+		var capKeys []int
+		for i := 0; i < 5; i++ {
+			key := getCaptchaKey()
+			fmt.Println("Got captcha key", key)
+			capKeys = append(capKeys, key)
+		}
+		wg := sync.WaitGroup{}
+		for i := 0; i < 5; i++ {
+			wg.Add(1)
+			go func(captchaKey int) {
+				defer wg.Done()
+				tlsConfig := &tls.Config{InsecureSkipVerify: true}
+				proxyURL, err := url.Parse(c.Proxy)
+				if err != nil {
+					panic(err)
 				}
-				wg := sync.WaitGroup{}
-				for i := 0; i < 1; i++ {
-					wg.Add(1)
-					go func(captchaKey int) {
-						defer wg.Done()
-						clientID := "kimne78kx3ncx6brgo4mv6wki5h1ko"
-						captchaToken := getCaptchaToken(captchaKey)
-						if captchaToken == "" {
-							return
-						}
-						email := getEmail()
-						username := getUsername()
-						account := registerAccount(&TwitchRegisterBody{
-							Username: username,
-							Password: c.Password,
-							Email:    email,
-							Birthday: TwitchBirthday{
-								Day:   12,
-								Month: 2,
-								Year:  1998,
-							},
-							ClientID:                clientID,
-							IncludeVerificationCode: true,
-							Arkose: TwitchFuncaptcha{
-								Token: captchaToken,
-							},
-						}, scraperKey)
-						if strings.HasPrefix(account, "Request failed") {
-							fmt.Println(account)
-							setCaptchaBad(captchaKey)
-							return
-						}
-						if account == "You've hit the request limit for your current plan. Please upgrade to continue using Scraper API, or contact support@scraperapi.com." {
-							fmt.Println(scraperKey, "is bad!!!")
-						}
-						var r TwitchRegisterResponse
-						er := json.Unmarshal([]byte(account), &r)
-						if er != nil {
-							fmt.Println("oauth resp err", er)
-						}
-						Oauth := r.OAuth
-						followThatMan(c.TwitchID, Oauth, scraperKey)
-						saveAccount(fmt.Sprintf("\n=====================\nUsername: %v\nPassword: %v\nEmail: %v\nOAuth: %v\n=====================", username, c.Password, email, Oauth))
-					}(capKeys[i])
+				client := &http.Client{Transport: &http.Transport{
+					TLSClientConfig: tlsConfig,
+					Proxy:           http.ProxyURL(proxyURL),
+				},
+					Timeout: 60 * time.Second,
 				}
-				wg.Wait()
-			}
-		}(key)
+				clientID := "kimne78kx3ncx6brgo4mv6wki5h1ko"
+				captchaToken := getCaptchaToken(captchaKey)
+				if captchaToken == "" {
+					return
+				}
+				email := getEmail()
+				username := getUsername()
+				account := registerAccount(&TwitchRegisterBody{
+					Username: username,
+					Password: c.Password,
+					Email:    email,
+					Birthday: TwitchBirthday{
+						Day:   12,
+						Month: 2,
+						Year:  1998,
+					},
+					ClientID:                clientID,
+					IncludeVerificationCode: true,
+					Arkose: TwitchFuncaptcha{
+						Token: captchaToken,
+					},
+				}, client)
+				fmt.Println(account)
+				var r TwitchRegisterResponse
+				er := json.Unmarshal([]byte(account), &r)
+				if er != nil {
+					fmt.Println("oauth resp err", er)
+				}
+				Oauth := r.OAuth
+				followThatMan(c.TwitchID, Oauth, client)
+				saveAccount(fmt.Sprintf("\n=====================\nUsername: %v\nPassword: %v\nEmail: %v\nOAuth: %v\n=====================", username, c.Password, email, Oauth))
+			}(capKeys[i])
+		}
+		wg.Wait()
 	}
-	keywg.Wait()
 }
